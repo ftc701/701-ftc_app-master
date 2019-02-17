@@ -23,7 +23,7 @@ public class MeacanumTestAndroidStudio extends LinearOpMode {
 
     int count1 = 0;
 
-    float intakeDC = 0;
+    float extendDC = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -65,9 +65,9 @@ public class MeacanumTestAndroidStudio extends LinearOpMode {
             float LeftTopDC = (gamepad1.left_stick_y - gamepad1.right_stick_x * 0.5f - gamepad1.left_stick_x)/mod;
             float LeftBackDC = (gamepad1.left_stick_y - gamepad1.right_stick_x * 0.5f +  gamepad1.left_stick_x)/mod;
 
-            float bigLiftDC = (gamepad2.left_stick_y);
-            float extendDC = (-gamepad2.right_stick_y);
-            float actDC = (gamepad2.left_trigger - gamepad2.right_trigger);
+            float bigLiftDC = (-gamepad2.left_stick_y);
+            float intakeDC = (-gamepad2.right_stick_y);
+            float actDC = (-gamepad2.left_trigger + gamepad2.right_trigger);
 
             RightTopDC = Range.clip(RightTopDC, -1, 1);
             RightBackDC = Range.clip(RightBackDC, -1, 1);
@@ -75,7 +75,7 @@ public class MeacanumTestAndroidStudio extends LinearOpMode {
             LeftBackDC = Range.clip(LeftBackDC, -1, 1);
 
             bigLiftDC = Range.clip(bigLiftDC, -0.5f, 0.5f);
-            extendDC = Range.clip(extendDC, -1, 1);
+            intakeDC = Range.clip(intakeDC, -1, 1);
             actDC = Range.clip(actDC, -1, 1);
 
             RTMotor.setPower(RightTopDC);
@@ -84,18 +84,19 @@ public class MeacanumTestAndroidStudio extends LinearOpMode {
             LBMotor.setPower(LeftBackDC);
 
             bigLift.setPower(bigLiftDC);
-            extend.setPower(extendDC);
-            act.setPower(actDC);
             intake.setPower(intakeDC);
+            act.setPower(actDC);
+            extend.setPower(extendDC);
 
 
-            if (gamepad2.x){
-                intakeDC = 1;
-            } else if (gamepad2.y){
-                intakeDC = -1;
+            if (gamepad2.dpad_up){
+                extendDC = 1;
+            } else if (gamepad2.dpad_down){
+                extendDC = -1;
             } else {
-                intakeDC = 0;
+                extendDC = 0;
             }
+
 
             //613
             //4808
