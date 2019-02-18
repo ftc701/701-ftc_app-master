@@ -65,8 +65,8 @@ public class MeacanumTestAndroidStudio extends LinearOpMode {
             float LeftTopDC = (gamepad1.left_stick_y - gamepad1.right_stick_x * 0.5f - gamepad1.left_stick_x)/mod;
             float LeftBackDC = (gamepad1.left_stick_y - gamepad1.right_stick_x * 0.5f +  gamepad1.left_stick_x)/mod;
 
-            float bigLiftDC = (-gamepad2.left_stick_y);
-            float intakeDC = (-gamepad2.right_stick_y);
+            float bigLiftDC = (-gamepad2.right_stick_y);
+            float intakeDC = (-gamepad2.left_stick_y);
             float actDC = (-gamepad2.left_trigger + gamepad2.right_trigger);
 
             RightTopDC = Range.clip(RightTopDC, -1, 1);
@@ -100,6 +100,7 @@ public class MeacanumTestAndroidStudio extends LinearOpMode {
 
             //613
             //4808
+            /*
             if (gamepad2.right_bumper){
                 bigLift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -115,6 +116,7 @@ public class MeacanumTestAndroidStudio extends LinearOpMode {
                 bigLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 extend.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
+            */
 /*
             if (gamepad1.y) {
 
