@@ -17,9 +17,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.min;
 
 
-@Autonomous(name = "AutoCRATER", group = "States")
+@Autonomous(name = "VTAutoCRATER", group = "States")
 
 public class AutoCRATER extends LinearOpMode {
 
@@ -33,6 +34,7 @@ public class AutoCRATER extends LinearOpMode {
     private DcMotor act;
 
     private Servo servo1;
+    private Servo servo2;
 
     BNO055IMU imu;
 
@@ -48,6 +50,16 @@ public class AutoCRATER extends LinearOpMode {
 
     // "L", "C", "R"
     String sampleLocation = "";
+
+    static final double     COUNTS_PER_MOTOR_REV    = 2240;    // eg: TETRIX Motor Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 1.0;     // This is < 1.0 if geared UP
+    static final double     WHEEL_DIAMETER_INCHES   = 4.0;     // For figuring circumference
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * Math.PI);
+    static final double     DRIVE_SPEED             = 0.6;
+    static final double     TURN_SPEED              = 0.5;
+
+    double inches;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -68,6 +80,7 @@ public class AutoCRATER extends LinearOpMode {
         act = hardwareMap.dcMotor.get("act");
 
         servo1 = hardwareMap.servo.get("servo1");
+        servo2 = hardwareMap.servo.get("servo2");
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
@@ -104,8 +117,8 @@ public class AutoCRATER extends LinearOpMode {
 
         //26:1 Motor 21934 for lift
 
-      //CODE TO GET ROBOT OFF LIFT AND IN FRONT OF STUFF  
-        setLiftPos(16400);
+        //CODE TO GET ROBOT OFF LIFT AND IN FRONT OF STUFF
+        setLiftPos(16000);
         GyroTurnSimple(0);
 
 
@@ -116,13 +129,13 @@ public class AutoCRATER extends LinearOpMode {
         //17687
 
         Sample.changeRect(480, 640, 340, 300);
-        Thread.sleep(100);
+        Thread.sleep(50);
         massC = sampleMass();
 
         Sample.changeRect(480, 300, 340, 0);
-        Thread.sleep(100);
+        Thread.sleep(50);
         massR = sampleMass();
-        Sample.disable();
+        //  Sample.disable();
 
         if (massC > 100000){
             sampleLocation = "C";
@@ -136,32 +149,40 @@ public class AutoCRATER extends LinearOpMode {
 
 
         //MOVEMENT AFTER SAMPLE
-        TankForward(0.2,200); //Unlatch
-        MeacanumStrafe(0.2,-200); //Strafe away from latch
-        TankForward(0.2,-50); //Move to original + 150 pos.
-        MeacanumStrafe(0.2, -500);
+        MoveForward(4); //Unlatch
+        MeacanumStrafe(0.2,200); //Strafe away from latch
+        MoveForward(-4);
+        MeacanumStrafe(0.2, 900);
 
 
-      //MOVE BASED ON SAMPLE
+        //MOVE BASED ON SAMPLE
         if (sampleLocation == "L") {
-           TankForward(0.5,500);
-           MeacanumStrafe(0.3, -1500);
+            MoveForward(-10);
+            MeacanumStrafe(0.2, 2000);
+           /*
+           TankForward(0.5,750);
+           mineralHit();
+           TankForward(0.5, 500);
+            MeacanumStrafe(0.3, -1000);
+            */
         } else if (sampleLocation == "C"){
-           //ALREADY IN CENTER NO TANK FORWARD NEEDED
-            MeacanumStrafe(0.3, -1500);
+            MeacanumStrafe(0.2, 2000);
         } else if (sampleLocation == "R"){
-            TankForward(0.3,-550);
-            MeacanumStrafe(0.5, -1500);
-        } else {
-            //ALREADY IN CENTER NO TANK FORWARD NEEDED
-            MeacanumStrafe(0.3, -1500);
+            MoveForward(10);
+            MeacanumStrafe(0.2, 2000);
+
         }
 
 
+
+
+/*
         //MOVEMENT AFTER SAMPLE
-        depositMarker();
+        TankForward(0.5,2000);
         GyroTurnSimple((90) - 42);
-        TankForward(0.5,5000);
+        TankForward(0.5,-5000);
+        depositMarker();
+        TankForward(0.7,5000);
 
 
         /*
@@ -171,7 +192,7 @@ public class AutoCRATER extends LinearOpMode {
 
 
        /*
-       //SAMPLE CODE 
+       //SAMPLE CODE
         TankForward(0.8,0);
         Thread.sleep(1500);
         TankOff();
@@ -514,8 +535,164 @@ public class AutoCRATER extends LinearOpMode {
 
     public void depositMarker() throws InterruptedException {
         servo1.setPosition(1);
-        Thread.sleep(1000);
+        Thread.sleep(500);
         servo1.setPosition(0.5);
+    }
+
+    public void MeacanumStrafeNew(double power, int target) {
+
+        resetEncoders();
+
+        while (RTMotor.getCurrentPosition() < target){
+
+        }
+        TankOff();
+        RBMotor.setPower(-power);
+        RTMotor.setPower(power);
+        LBMotor.setPower(power);
+        LTMotor.setPower(-power);
+    }
+    public void mineralHit() throws InterruptedException {
+        servo2.setPosition(1);
+        Thread.sleep(500);
+        servo2.setPosition(0.3);
+    }
+
+    public void encoderDrive(double speed,
+                             double leftInches, double rightInches,
+                             double timeoutS)  {
+        int newLTtarget;
+        int newLBtarget;
+        int newRTtarget;
+        int newRBtarget;
+
+        leftInches /= 4;
+        rightInches /= 4;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            newLTtarget = LTMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newLBtarget = LBMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRTtarget = RTMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);;
+            newRBtarget = RBMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);;
+
+            LTMotor.setTargetPosition(newLTtarget);
+            LBMotor.setTargetPosition(newLBtarget);
+            RTMotor.setTargetPosition(newRTtarget);
+            RBMotor.setTargetPosition(newRBtarget);
+
+
+            // Turn On RUN_TO_POSITION
+            runModePos();
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            LTMotor.setPower(Math.abs(speed));
+            LBMotor.setPower(Math.abs(speed));
+            RTMotor.setPower(Math.abs(speed));
+            RBMotor.setPower(Math.abs(speed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (LTMotor.isBusy() && !isStopRequested())) {
+
+                // Display it for the driver.
+                telemetry.addData("Path1",  "Running to %7d, %7d:, %7d, %7d", newLTtarget,  newLBtarget, newRTtarget, newRBtarget);
+                telemetry.addData("Path2",  "Running at %7d :%7d",
+                        LTMotor.getCurrentPosition(),
+                        LBMotor.getCurrentPosition(),
+                        RTMotor.getCurrentPosition(),
+                        RBMotor.getCurrentPosition());
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            TankOff();
+
+            // Turn off RUN_TO_POSITION
+            runModeNorm();
+
+            //  sleep(250);   // optional pause after each move
+        }
+    }
+
+    public void encoderDriveMeacanum(double speed,
+                                     double leftInches, double rightInches,
+                                     double timeoutS)  {
+        int newLTtarget;
+        int newLBtarget;
+        int newRTtarget;
+        int newRBtarget;
+
+        leftInches /= 4;
+        rightInches /= 4;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            newLTtarget = LTMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newLBtarget = LBMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRTtarget = RTMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);;
+            newRBtarget = RBMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);;
+
+            LTMotor.setTargetPosition(newLTtarget);
+            LBMotor.setTargetPosition(newLBtarget);
+            RTMotor.setTargetPosition(newRTtarget);
+            RBMotor.setTargetPosition(newRBtarget);
+
+
+            // Turn On RUN_TO_POSITION
+            runModePos();
+
+            // reset the timeout time and start motion.
+            runtime.reset();
+            LTMotor.setPower(Math.abs(speed));
+            LBMotor.setPower(Math.abs(speed));
+            RTMotor.setPower(Math.abs(speed));
+            RBMotor.setPower(Math.abs(speed));
+
+            // keep looping while we are still active, and there is time left, and both motors are running.
+            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
+            // its target position, the motion will stop.  This is "safer" in the event that the robot will
+            // always end the motion as soon as possible.
+            // However, if you require that BOTH motors have finished their moves before the robot continues
+            // onto the next step, use (isBusy() || isBusy()) in the loop test.
+            while (opModeIsActive() &&
+                    (runtime.seconds() < timeoutS) &&
+                    (LTMotor.isBusy() && !isStopRequested())) {
+
+                // Display it for the driver.
+                telemetry.addData("Path1",  "Running to %7d, %7d:, %7d, %7d", newLTtarget,  newLBtarget, newRTtarget, newRBtarget);
+                telemetry.addData("Path2",  "Running at %7d :%7d",
+                        LTMotor.getCurrentPosition(),
+                        LBMotor.getCurrentPosition(),
+                        RTMotor.getCurrentPosition(),
+                        RBMotor.getCurrentPosition());
+                telemetry.update();
+            }
+
+            // Stop all motion;
+            TankOff();
+
+            // Turn off RUN_TO_POSITION
+            runModeNorm();
+
+            //  sleep(250);   // optional pause after each move
+        }
+    }
+
+    public void MoveForward(double inches)
+    {
+        encoderDrive(0.5, inches , inches, 5);
     }
 
 }
