@@ -19,6 +19,9 @@ public class MeacanumTestAndroidStudio extends LinearOpMode {
     private DcMotor act;
     private DcMotor intake;
 
+    private Servo servo1;
+    private Servo servo2;
+
     float mod = 1f;
 
     int count1 = 0;
@@ -37,6 +40,9 @@ public class MeacanumTestAndroidStudio extends LinearOpMode {
         extend = hardwareMap.dcMotor.get("extend");
         act = hardwareMap.dcMotor.get("act");
         intake = hardwareMap.dcMotor.get("intake");
+
+        servo1 = hardwareMap.servo.get("servo1");
+        servo2 = hardwareMap.servo.get("servo2");
 
         RTMotor.setDirection(DcMotor.Direction.FORWARD);
         RBMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -90,9 +96,9 @@ public class MeacanumTestAndroidStudio extends LinearOpMode {
 
 
             if (gamepad2.dpad_up){
-                extendDC = 1;
-            } else if (gamepad2.dpad_down){
                 extendDC = -1;
+            } else if (gamepad2.dpad_down){
+                extendDC = 1;
             } else {
                 extendDC = 0;
             }
@@ -117,6 +123,21 @@ public class MeacanumTestAndroidStudio extends LinearOpMode {
                 extend.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
             */
+
+            if (gamepad1.left_bumper) {
+                servo1.setPosition(1.0);
+            } else if (gamepad1.right_bumper){
+                servo1.setPosition(0);
+            } else {
+                servo1.setPosition(0.5);
+            }
+
+            if (gamepad1.dpad_left){
+                servo2.setPosition(1);
+            }
+            if (gamepad1.dpad_right){
+                servo2.setPosition(0);
+            }
 /*
             if (gamepad1.y) {
 
