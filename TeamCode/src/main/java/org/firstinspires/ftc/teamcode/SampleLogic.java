@@ -1,37 +1,24 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.content.ContentResolver;
-import android.graphics.Bitmap;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
 import org.opencv.android.JavaCameraView;
-import org.opencv.android.Utils;
 import org.opencv.core.Core;
-import org.opencv.core.CvException;
-import org.opencv.core.CvType;
 import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.features2d.FeatureDetector;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
 
 import static java.lang.String.valueOf;
-
 
 
 public class SampleLogic extends OpenCVPipeline {

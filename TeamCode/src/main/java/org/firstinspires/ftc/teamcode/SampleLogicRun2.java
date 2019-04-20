@@ -1,21 +1,12 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.provider.MediaStore;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.corningrobotics.enderbots.endercv.CameraViewDisplay;
 import org.opencv.android.JavaCameraView;
-import org.opencv.core.Core;
-import org.opencv.core.KeyPoint;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfKeyPoint;
-
-import static java.lang.String.valueOf;
 
 @Autonomous(name = "TestSampleScreen", group = "Test")
 //@Disabled

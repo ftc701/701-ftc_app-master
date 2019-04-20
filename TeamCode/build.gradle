@@ -17,3 +17,7 @@ dependencies {
 android {
     compileSdkVersion 21
 }
+dependencies {
+    //NOTE: this is the correct version, the below screenshot is outdated
+    compile 'org.openftc:rev-extensions-2:1.1'
+}

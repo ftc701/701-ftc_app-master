@@ -17,7 +17,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.min;
 
 
 @Autonomous(name = "VTAutoCRATER", group = "States")
@@ -118,7 +117,7 @@ public class AutoCRATER extends LinearOpMode {
         //26:1 Motor 21934 for lift
 
         //CODE TO GET ROBOT OFF LIFT AND IN FRONT OF STUFF
-        setLiftPos(16000);
+        setLiftPos(16350);
         GyroTurnSimple(0);
 
 
@@ -152,13 +151,13 @@ public class AutoCRATER extends LinearOpMode {
         MoveForward(4); //Unlatch
         MeacanumStrafe(0.2,200); //Strafe away from latch
         MoveForward(-4);
-        MeacanumStrafe(0.2, 900);
+        MeacanumStrafe(0.2, 820);
 
 
         //MOVE BASED ON SAMPLE
         if (sampleLocation == "L") {
             MoveForward(-10);
-            MeacanumStrafe(0.2, 2000);
+            MeacanumStrafe(0.2, 750);
            /*
            TankForward(0.5,750);
            mineralHit();
@@ -166,10 +165,10 @@ public class AutoCRATER extends LinearOpMode {
             MeacanumStrafe(0.3, -1000);
             */
         } else if (sampleLocation == "C"){
-            MeacanumStrafe(0.2, 2000);
+            MeacanumStrafe(0.2, 750);
         } else if (sampleLocation == "R"){
             MoveForward(10);
-            MeacanumStrafe(0.2, 2000);
+            MeacanumStrafe(0.2, 750);
 
         }
 
