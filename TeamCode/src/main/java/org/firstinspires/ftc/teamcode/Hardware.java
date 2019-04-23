@@ -87,7 +87,7 @@ public class Hardware extends LinearOpMode {
         RightE.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RightE.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-         motors = Arrays.asList(LTMotor, LBMotor, RBMotor, RTMotor);
+        motors = Arrays.asList(LTMotor, LBMotor, RBMotor, RTMotor);
 
         for (DcMotor motor : motors) {
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -96,13 +96,113 @@ public class Hardware extends LinearOpMode {
 
     }
 
-    public void EncoderX(int ticks, float power){
+    public void TankForward(double power, int target){
+        LTMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LBMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RTMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RBMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        if (target != 0) {
+            LTMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            LBMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            RTMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            RBMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            RBMotor.setTargetPosition(target);
+            RTMotor.setTargetPosition(target);
+            LBMotor.setTargetPosition(target);
+            LTMotor.setTargetPosition(target);
+            while (LTMotor.isBusy() && !isStopRequested()) {
+                OpenPower(power, power, power, power);
+                showTelemetry();
+            }
+            RobotStop();
+        } else {
+
+            LTMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            LBMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            RTMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            RBMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+            RTMotor.setPower(power);
+            RBMotor.setPower(power);
+            LTMotor.setPower(power);
+            LBMotor.setPower(power);
+        }
+    }
+
+    public void EncoderY(int ticks, double power){
        int error = Math.abs(LeftE.getCurrentPosition() - ticks);
        while (error < 10){
+           error = Math.abs(LeftE.getCurrentPosition() - ticks);
            OpenPower(power, power, power, power);
        }
        RobotStop();
 
+    }
+
+    public void MeacanumStrafe(double power, int target) {
+
+        LTMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LBMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RTMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RBMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        int mod3 = 1;
+
+        if (target < 0){
+            mod3 = -1;
+        }
+
+        if (target != 0) {
+
+            LTMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            LBMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            RTMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            RBMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            RBMotor.setTargetPosition(-target);
+            RTMotor.setTargetPosition(target);
+            LBMotor.setTargetPosition(target);
+            LTMotor.setTargetPosition(-target);
+
+            while (LTMotor.isBusy() && RTMotor.isBusy() && RBMotor.isBusy() && LBMotor.isBusy() && !isStopRequested()) {
+
+                /*
+                double testerror = (getHeading() - 0);
+
+                double propControl = 0.05;
+
+                double powerVal = (propControl * testerror);
+                powerVal = Range.clip(powerVal,-1 ,1);
+                */
+
+                RTMotor.setPower(power);
+                RBMotor.setPower(power);
+                LTMotor.setPower(power);
+                LBMotor.setPower(power);
+/*
+                telemetry.addData("angle: ", getHeading());
+                telemetry.addData("error: ", testerror);
+                telemetry.addData("powerVal: ", powerVal);
+                telemetry.update();
+*/
+            }
+
+            RobotStop();
+
+        } else {
+
+            LTMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            LBMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            RTMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            RBMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+            RBMotor.setPower(-power);
+            RTMotor.setPower(power);
+            LBMotor.setPower(power);
+            LTMotor.setPower(-power);
+        }
     }
 
     public void GyroTurn(int TargetAngle, String direction) {
@@ -138,15 +238,38 @@ public class Hardware extends LinearOpMode {
         RobotStop();
     }
 
-    public void EncoderTurn(int ticks, float power){
+    public void GyroTurnSimple(int TargetAngle){
+
+        float testerror = (getHeading() - TargetAngle);
+
+        // -1 < testerror < 1
+
+        while (!((-1.5 < testerror) && (testerror < 1.5)) && opModeIsActive()){
+
+            float propControl = 0.004f;
+
+            float powerVal = (propControl * testerror);
+            powerVal = Range.clip(powerVal,-1 ,1);
+            OpenPower(-powerVal, -powerVal, powerVal, powerVal);
+
+            testerror = (getHeading() - TargetAngle);
+            telemetry.addData("error: ", testerror);
+            telemetry.addData("powerVal: ", powerVal);
+            telemetry.update();
+        }
+        RobotStop();
+    }
+
+    public void EncoderTurn(int ticks, double power){
         int error = Math.abs(LeftE.getCurrentPosition() - ticks);
         while (error < 10){
+            error = Math.abs(LeftE.getCurrentPosition() - ticks);
             OpenPower(power, power, -power, -power);
         }
         RobotStop();
     }
 
-    public void OpenPower(float p1, float p2, float p3, float p4) {
+    public void OpenPower(double p1, double p2, double p3, double p4) {
         LTMotor.setPower(p1);
         LBMotor.setPower(p2);
         RTMotor.setPower(p3);
@@ -195,7 +318,7 @@ public class Hardware extends LinearOpMode {
         }
     }
 
-    public void IntakeOn(boolean on, float power){
+    public void IntakeOn(boolean on, double power){
       if (on){
           servo1.setPower(power);
       } else {
@@ -203,12 +326,16 @@ public class Hardware extends LinearOpMode {
       }
     }
 
-    public void BucketOn(boolean on, float power){
+    public void BucketOn(boolean on, double power){
         if (on){
             servo2.setPower(power);
         } else {
             servo2.setPower(0);
         }
+    }
+
+    public void IntakeBucket(double power){
+        intake.setPower(power);
     }
 
     public void showTelemetry(){
@@ -220,9 +347,11 @@ public class Hardware extends LinearOpMode {
 
         telemetry.addData("---","------");
 
-        telemetry.addData("leftEncoder: ", LTMotor.getCurrentPosition());
-        telemetry.addData("CenterEncoder: ", LBMotor.getCurrentPosition());
-        telemetry.addData("RightEncoder: ", RTMotor.getCurrentPosition());
+        telemetry.addData("LTMotor: ", LTMotor.getCurrentPosition());
+        telemetry.addData("LBMotor: ", LBMotor.getCurrentPosition());
+        telemetry.addData("RTMotor: ", RTMotor.getCurrentPosition());
+        telemetry.addData("RBMotor: ", RBMotor.getCurrentPosition());
+
 
         telemetry.update();
 

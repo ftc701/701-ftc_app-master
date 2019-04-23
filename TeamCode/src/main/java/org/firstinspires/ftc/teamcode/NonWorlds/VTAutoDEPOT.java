@@ -1,9 +1,10 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.NonWorlds;
 
 import android.util.Log;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -15,13 +16,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.NonWorlds.SampleLogic;
 
 import static java.lang.Math.abs;
 
 
-@Autonomous(name = "VTAutoNEWTONMERGE", group = "States")
-
-public class VTAutoNEWTONMERGE extends LinearOpMode {
+@Autonomous(name = "VTAutoDEPOT", group = "States")
+@Disabled
+public class VTAutoDEPOT extends LinearOpMode {
 
     private DcMotor RBMotor;
     private DcMotor RTMotor;
@@ -120,34 +122,95 @@ public class VTAutoNEWTONMERGE extends LinearOpMode {
         setLiftPos(16350);
         GyroTurnSimple(0);
 
+
         //Sample.changeRect();
         //Thread.sleep(500);
 
         //13369 NEW NEW
         //17687
-        Thread.sleep(100);
+
+        Sample.changeRect(480, 640, 340, 300);
+        Thread.sleep(50);
+        massC = sampleMass();
+
+        Sample.changeRect(480, 300, 340, 0);
+        Thread.sleep(50);
+        massR = sampleMass();
+      //  Sample.disable();
+
+        if (massC > 100000){
+            sampleLocation = "C";
+        } else if (massR > 50000){
+            sampleLocation = "R";
+        } else {
+            sampleLocation = "L";
+        }
+        telemetry.addData("sampleLocation: ", sampleLocation);
+        telemetry.update();
+
 
         //MOVEMENT AFTER SAMPLE
         MoveForward(4); //Unlatch
         MeacanumStrafe(0.2,200); //Strafe away from latch
         MoveForward(-4);
-
-        /*
-        MeacanumStrafe(0.2, 400);
-
-        //STUFF
-        GyroTurnSimple((90) - 40);
-        MoveForward(40);
-        MeacanumStrafe(0.2, 3000);
-        servo1.setPosition(0);
-        Thread.sleep(750);
-        servo1.setPosition(1);
-        GyroTurnSimple(-39);
-        MoveForward(50);
+        MeacanumStrafe(0.2, 790);
+        GyroTurnSimple(3);
 
 
       //MOVE BASED ON SAMPLE
+        if (sampleLocation == "L") {
+            MoveForward(-10);
+            servo2.setPosition(1);
+            Thread.sleep(1000);
+            servo2.setPosition(0);
+            MoveForward(-10);
+            GyroTurnSimple(-39);
+            MoveForward(-17.5);
+            GyroTurnSimple((90) - 42);
+            MoveForward(50);
+            MeacanumStrafe(0.5,-400);
+            servo1.setPosition(0);
+            Thread.sleep(750);
+            servo1.setPosition(0.5);
+            MeacanumStrafe(0.5,400);
+           /*
+           TankForward(0.5,750);
+           mineralHit();
+           TankForward(0.5, 500);
+            MeacanumStrafe(0.3, -1000);
+            */
+        } else if (sampleLocation == "C"){
+            servo2.setPosition(1);
+            Thread.sleep(1000);
+            servo2.setPosition(0);
+            MoveForward(-25);
+            GyroTurnSimple(-39);
+            MoveForward(-17.5);
+            GyroTurnSimple((90) - 42);
+            MoveForward(50);
+            MeacanumStrafe(0.5,-400);
+            servo1.setPosition(0);
+            Thread.sleep(750);
+            servo1.setPosition(0.5);
+            MeacanumStrafe(0.5,400);
+        } else if (sampleLocation == "R"){
+            MoveForward(12);
+            servo2.setPosition(1);
+            Thread.sleep(1000);
+            servo2.setPosition(0);
+            MoveForward(-35);
+            GyroTurnSimple(-39);
+            MoveForward(-17.5);
+            GyroTurnSimple((90) - 42);
+            MoveForward(50);
+            MeacanumStrafe(0.5,-400);
+            servo1.setPosition(0);
+            Thread.sleep(750);
+            servo1.setPosition(0.5);
+            MeacanumStrafe(0.5,400);
+        }
 
+        encoderDrive(1.0,-80,-80,10);
 
 /*
         //MOVEMENT AFTER SAMPLE

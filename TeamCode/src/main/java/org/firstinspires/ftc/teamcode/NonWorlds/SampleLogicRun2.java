@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.NonWorlds;
 
 import android.util.Log;
 
@@ -7,10 +7,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.corningrobotics.enderbots.endercv.CameraViewDisplay;
-import org.firstinspires.ftc.teamcode.SampleLogic;
+import org.firstinspires.ftc.teamcode.NonWorlds.SampleLogic;
 import org.opencv.android.JavaCameraView;
 
 @Autonomous(name = "TestSampleScreen", group = "Test")
+@Disabled
 public class SampleLogicRun2 extends LinearOpMode {
 
     private SampleLogic Sample;
@@ -35,19 +36,9 @@ public class SampleLogicRun2 extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
 
             Thread.sleep(2000);
-            Sample.changeRect(12, 6, 160, 160);  //center
-            Sample.frameNeeded = true;
-            Thread.sleep(500);
-            telemetry.addData("Mass: ", Sample.returnTotalMass());
-            telemetry.update();
-            Log.e(TAG, "Mass: " + Sample.returnTotalMass());
+            Sample.changeRect(480, 640, 380, 0);
             Thread.sleep(2000);
-            Sample.changeRect(12, 180, 160, 350);
-            Sample.frameNeeded = true;
-            Thread.sleep(500);
-            telemetry.addData("Mass: ", Sample.returnTotalMass());
-            telemetry.update();
-            Log.e(TAG, "Mass: " + Sample.returnTotalMass());
+            Sample.changeRect(480, 150, 380, 0);
 
             if (gamepad1.a) {
 

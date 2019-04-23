@@ -4,11 +4,9 @@ import android.util.Log;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -17,7 +15,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.SampleLogic;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,8 +22,8 @@ import java.util.List;
 import static java.lang.Math.abs;
 
 
-@Autonomous(name = "WORLDS_DEPOT", group = "WORLDS")
-public class WorldsDEPOT extends LinearOpMode {
+@Autonomous(name = "WORLDS_CRATER", group = "WORLDS")
+public class WorldsCRATER extends LinearOpMode {
 
     DcMotor RTMotor, RBMotor, LTMotor, LBMotor;
 
@@ -153,50 +150,25 @@ public class WorldsDEPOT extends LinearOpMode {
         //GyroTurnSimple(-90); //Turn toward Minerals
         encoderTurn(0.4, -620);
         TankForward(0.4,-350); //Move closer to Minerals
-        setExtendPos(-485);
-        IntakeBucketEncoder(1,130);
-        IntakeTurning(0.5);
-        Thread.sleep(500);
-        IntakeTurning(0);
-        IntakeBucketEncoder(1,0);
-        IntakeBucket(0);
-        setExtendPos(-30);
-        TankForward(0.4,150);
 
 
         //MOVE BASED ON SAMPLE
         if (sampleLocation == "L") {
             //GyroTurnSimple(-45);
             encoderTurn(0.4, 289);
-            IntakeBucket(1);
-            IntakeTurning(-0.5);
-            Thread.sleep(500);
-            setExtendPos(-300);
-            setExtendPos(20);
+            TankForward(0.4,-500);
+            TankForward(0.4,500);
         } else if (sampleLocation == "C"){
-            IntakeBucket(1);
-            IntakeTurning(-0.5);
-            Thread.sleep(500);
-            setExtendPos(-200);
-            setExtendPos(0);
-            GyroTurnSimple(-15);
+            TankForward(0.4,-500);
+            TankForward(0.4,500);
         } else if (sampleLocation == "R"){
             //GyroTurnSimple(-120);
             encoderTurn(0.4, -250);
-            IntakeBucket(1);
-            IntakeTurning(-0.5);
-            Thread.sleep(500);
-            setExtendPos(-300);
-            setExtendPos(0);
-            GyroTurnSimple(-45);
+            TankForward(0.4,-500);
+            TankForward(0.4,500);
+
         } else {
-            TankForward(0.2,100);
-            IntakeBucket(1);
-            IntakeTurning(-0.5);
-            Thread.sleep(500);
-            setExtendPos(-150);
-            setExtendPos(0);
-            TankForward(0.2,-100);
+
         }
 
 
@@ -206,7 +178,10 @@ public class WorldsDEPOT extends LinearOpMode {
         GyroTurnSimple(49);
         //encoderTurn(0.4, 400);
         MeacanumStrafe(0.4, 500);
-        TankForward(1,-1000);
+        TankForward(1,-2000);
+        IntakeBucketEncoder(1,130);
+        IntakeTurning(0.5);
+        TankForward(1,3500);
 
 
     }

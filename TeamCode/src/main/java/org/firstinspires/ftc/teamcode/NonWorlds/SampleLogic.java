@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.NonWorlds;
 
 import android.util.Log;
 
@@ -61,8 +61,8 @@ public class SampleLogic extends OpenCVPipeline {
         public void run() {
 
             massL = 0;
-            Rect rectCrop = new Rect(new Point(RectP1X + 2, RectP1Y + 2),
-                    new Point(RectP2X - 2, RectP2Y - 2));
+            Rect rectCrop = new Rect(new Point(RectP1X - 11, RectP1Y - 11),
+                    new Point(RectP2X + 11, RectP2Y + 11));
             //RectX,RectY,RectW,RectH
             //new Point(RectX,  RectH), new Point(RectW, RectY)
             //new Point(0,  213), new Point(480, 427)
@@ -170,9 +170,9 @@ public class SampleLogic extends OpenCVPipeline {
             //strT = Integer.valueOf(view.getHeight()) + "h by " + Integer.valueOf(view.getWidth()) + "w";
             strT = cvDilateOutput.cols() + "w by " + cvDilateOutput.rows() + "h";
         }
-        Point ptnText = new Point(300,300);
+        Point ptnText = new Point(30,300);
         Imgproc.putText(cvDilateOutput, strT, ptnText, Core.FONT_ITALIC, 0.5, new Scalar(255, 255, 200));
-        Imgproc.rectangle(cvDilateOutput, new Point(getRectP1X(), getRectP1Y()), new Point(getRectP2X(), getRectP2Y()), new Scalar(255, 255, 200), 2);
+        Imgproc.rectangle(cvDilateOutput, new Point(getRectP1X(), getRectP1Y()), new Point(getRectP2X(), getRectP2Y()), new Scalar(255, 255, 200), 20);
         //Core.reduce(rgba, colSumOutput, 0, Core.REDUCE_SUM, 4);
         hsvThresholdInput.release();
                 cvErodeSrc.release();

@@ -1,9 +1,10 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.NonWorlds;
 
 import android.util.Log;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -15,13 +16,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.NonWorlds.SampleLogic;
 
 import static java.lang.Math.abs;
 
 
-@Autonomous(name = "VTAutoDEPOT", group = "States")
-
-public class VTAutoDEPOT extends LinearOpMode {
+@Autonomous(name = "AutoDEPOT", group = "States")
+@Disabled
+public class AutoDEPOT extends LinearOpMode {
 
     private DcMotor RBMotor;
     private DcMotor RTMotor;
@@ -33,7 +35,6 @@ public class VTAutoDEPOT extends LinearOpMode {
     private DcMotor act;
 
     private Servo servo1;
-    private Servo servo2;
 
     BNO055IMU imu;
 
@@ -50,15 +51,13 @@ public class VTAutoDEPOT extends LinearOpMode {
     // "L", "C", "R"
     String sampleLocation = "";
 
-    static final double     COUNTS_PER_MOTOR_REV    = 2240;    // eg: TETRIX Motor Encoder
+    static final double     COUNTS_PER_MOTOR_REV    = 2440;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 1.0;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * Math.PI);
     static final double     DRIVE_SPEED             = 0.6;
     static final double     TURN_SPEED              = 0.5;
-
-    double inches;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -79,7 +78,6 @@ public class VTAutoDEPOT extends LinearOpMode {
         act = hardwareMap.dcMotor.get("act");
 
         servo1 = hardwareMap.servo.get("servo1");
-        servo2 = hardwareMap.servo.get("servo2");
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
@@ -108,6 +106,8 @@ public class VTAutoDEPOT extends LinearOpMode {
             telemetry.update();
         }
 
+     //   encoderDrive(.5,4,4,5.0);
+
         //Mass:222222
 
 
@@ -117,7 +117,7 @@ public class VTAutoDEPOT extends LinearOpMode {
         //26:1 Motor 21934 for lift
 
       //CODE TO GET ROBOT OFF LIFT AND IN FRONT OF STUFF  
-        setLiftPos(16350);
+        setLiftPos(15900);
         GyroTurnSimple(0);
 
 
@@ -148,75 +148,40 @@ public class VTAutoDEPOT extends LinearOpMode {
 
 
         //MOVEMENT AFTER SAMPLE
-        MoveForward(4); //Unlatch
+        TankForward(0.2,175); //Unlatch
         MeacanumStrafe(0.2,200); //Strafe away from latch
-        MoveForward(-4);
-        MeacanumStrafe(0.2, 790);
-        GyroTurnSimple(3);
+        TankForward(0.2,-25); //Move to original + 150 pos.
+        MeacanumStrafe(0.2, 500);
 
 
       //MOVE BASED ON SAMPLE
         if (sampleLocation == "L") {
-            MoveForward(-10);
-            servo2.setPosition(1);
-            Thread.sleep(1000);
-            servo2.setPosition(0);
-            MoveForward(-10);
-            GyroTurnSimple(-39);
-            MoveForward(-17.5);
-            GyroTurnSimple((90) - 42);
-            MoveForward(50);
-            MeacanumStrafe(0.5,-400);
-            servo1.setPosition(0);
-            Thread.sleep(750);
-            servo1.setPosition(0.5);
-            MeacanumStrafe(0.5,400);
-           /*
            TankForward(0.5,750);
-           mineralHit();
-           TankForward(0.5, 500);
-            MeacanumStrafe(0.3, -1000);
-            */
+           MeacanumStrafe(0.3, 1000);
+           GyroTurnSimple(-39);
+           TankForward(0.4, -500);
+           MeacanumStrafe(0.3,  1000);
         } else if (sampleLocation == "C"){
-            servo2.setPosition(1);
-            Thread.sleep(1000);
-            servo2.setPosition(0);
-            MoveForward(-25);
+            TankForward(0.3,-100);
+            MeacanumStrafe(0.3, 1550);
             GyroTurnSimple(-39);
-            MoveForward(-17.5);
-            GyroTurnSimple((90) - 42);
-            MoveForward(50);
-            MeacanumStrafe(0.5,-400);
-            servo1.setPosition(0);
-            Thread.sleep(750);
-            servo1.setPosition(0.5);
-            MeacanumStrafe(0.5,400);
+            TankForward(0.4, -1000);
         } else if (sampleLocation == "R"){
-            MoveForward(12);
-            servo2.setPosition(1);
-            Thread.sleep(1000);
-            servo2.setPosition(0);
-            MoveForward(-35);
+            TankForward(0.3,-800);
+            MeacanumStrafe(0.5, 1750);
             GyroTurnSimple(-39);
-            MoveForward(-17.5);
-            GyroTurnSimple((90) - 42);
-            MoveForward(50);
-            MeacanumStrafe(0.5,-400);
-            servo1.setPosition(0);
-            Thread.sleep(750);
-            servo1.setPosition(0.5);
-            MeacanumStrafe(0.5,400);
+            TankForward(0.4, -1500);
+        } else {
+            MeacanumStrafe(0.3, 1500);
+            GyroTurnSimple(-39);
+            TankForward(0.4, -1000);
         }
 
-        encoderDrive(1.0,-80,-80,10);
 
-/*
         //MOVEMENT AFTER SAMPLE
-        TankForward(0.5,2000);
+        depositMarker();
         GyroTurnSimple((90) - 42);
         TankForward(0.5,-5000);
-        depositMarker();
-        TankForward(0.7,5000);
 
 
         /*
@@ -568,28 +533,9 @@ public class VTAutoDEPOT extends LinearOpMode {
     }
 
     public void depositMarker() throws InterruptedException {
-        servo1.setPosition(1);
+        servo1.setPosition(0);
         Thread.sleep(500);
         servo1.setPosition(0.5);
-    }
-
-    public void MeacanumStrafeNew(double power, int target) {
-
-        resetEncoders();
-
-        while (RTMotor.getCurrentPosition() < target){
-
-        }
-        TankOff();
-        RBMotor.setPower(-power);
-        RTMotor.setPower(power);
-        LBMotor.setPower(power);
-        LTMotor.setPower(-power);
-    }
-    public void mineralHit() throws InterruptedException {
-        servo2.setPosition(1);
-        Thread.sleep(500);
-        servo2.setPosition(0.3);
     }
 
     public void encoderDrive(double speed,
@@ -600,9 +546,6 @@ public class VTAutoDEPOT extends LinearOpMode {
         int newRTtarget;
         int newRBtarget;
 
-        leftInches /= 4;
-        rightInches /= 4;
-
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
 
@@ -619,7 +562,7 @@ public class VTAutoDEPOT extends LinearOpMode {
 
 
             // Turn On RUN_TO_POSITION
-            runModePos();
+           runModePos();
 
             // reset the timeout time and start motion.
             runtime.reset();
@@ -636,7 +579,7 @@ public class VTAutoDEPOT extends LinearOpMode {
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while (opModeIsActive() &&
                     (runtime.seconds() < timeoutS) &&
-                    (LTMotor.isBusy() && !isStopRequested())) {
+                    (LTMotor.isBusy() && RTMotor.isBusy() && RBMotor.isBusy() && LBMotor.isBusy() && !isStopRequested())) {
 
                 // Display it for the driver.
                 telemetry.addData("Path1",  "Running to %7d, %7d:, %7d, %7d", newLTtarget,  newLBtarget, newRTtarget, newRBtarget);
@@ -656,77 +599,6 @@ public class VTAutoDEPOT extends LinearOpMode {
 
             //  sleep(250);   // optional pause after each move
         }
-    }
-
-    public void encoderDriveMeacanum(double speed,
-                             double leftInches, double rightInches,
-                             double timeoutS)  {
-        int newLTtarget;
-        int newLBtarget;
-        int newRTtarget;
-        int newRBtarget;
-
-        leftInches /= 4;
-        rightInches /= 4;
-
-        // Ensure that the opmode is still active
-        if (opModeIsActive()) {
-
-            // Determine new target position, and pass to motor controller
-            newLTtarget = LTMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newLBtarget = LBMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newRTtarget = RTMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);;
-            newRBtarget = RBMotor.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);;
-
-            LTMotor.setTargetPosition(newLTtarget);
-            LBMotor.setTargetPosition(newLBtarget);
-            RTMotor.setTargetPosition(newRTtarget);
-            RBMotor.setTargetPosition(newRBtarget);
-
-
-            // Turn On RUN_TO_POSITION
-            runModePos();
-
-            // reset the timeout time and start motion.
-            runtime.reset();
-            LTMotor.setPower(Math.abs(speed));
-            LBMotor.setPower(Math.abs(speed));
-            RTMotor.setPower(Math.abs(speed));
-            RBMotor.setPower(Math.abs(speed));
-
-            // keep looping while we are still active, and there is time left, and both motors are running.
-            // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
-            // its target position, the motion will stop.  This is "safer" in the event that the robot will
-            // always end the motion as soon as possible.
-            // However, if you require that BOTH motors have finished their moves before the robot continues
-            // onto the next step, use (isBusy() || isBusy()) in the loop test.
-            while (opModeIsActive() &&
-                    (runtime.seconds() < timeoutS) &&
-                    (LTMotor.isBusy() && !isStopRequested())) {
-
-                // Display it for the driver.
-                telemetry.addData("Path1",  "Running to %7d, %7d:, %7d, %7d", newLTtarget,  newLBtarget, newRTtarget, newRBtarget);
-                telemetry.addData("Path2",  "Running at %7d :%7d",
-                        LTMotor.getCurrentPosition(),
-                        LBMotor.getCurrentPosition(),
-                        RTMotor.getCurrentPosition(),
-                        RBMotor.getCurrentPosition());
-                telemetry.update();
-            }
-
-            // Stop all motion;
-            TankOff();
-
-            // Turn off RUN_TO_POSITION
-            runModeNorm();
-
-            //  sleep(250);   // optional pause after each move
-        }
-    }
-
-    public void MoveForward(double inches)
-    {
-        encoderDrive(0.5, inches , inches, 5);
     }
 
 }

@@ -1,9 +1,10 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.NonWorlds;
 
 import android.util.Log;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -15,13 +16,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.NonWorlds.SampleLogic;
 
 import static java.lang.Math.abs;
 
 
-@Autonomous(name = "VTAutoCRATER", group = "States")
-
-public class AutoCRATER extends LinearOpMode {
+@Autonomous(name = "VTAutoNEWTONMERGE", group = "States")
+@Disabled
+public class VTAutoNEWTONMERGE extends LinearOpMode {
 
     private DcMotor RBMotor;
     private DcMotor RTMotor;
@@ -116,63 +118,37 @@ public class AutoCRATER extends LinearOpMode {
 
         //26:1 Motor 21934 for lift
 
-        //CODE TO GET ROBOT OFF LIFT AND IN FRONT OF STUFF
+      //CODE TO GET ROBOT OFF LIFT AND IN FRONT OF STUFF  
         setLiftPos(16350);
         GyroTurnSimple(0);
-
 
         //Sample.changeRect();
         //Thread.sleep(500);
 
         //13369 NEW NEW
         //17687
-
-        Sample.changeRect(480, 640, 340, 300);
-        Thread.sleep(50);
-        massC = sampleMass();
-
-        Sample.changeRect(480, 300, 340, 0);
-        Thread.sleep(50);
-        massR = sampleMass();
-        //  Sample.disable();
-
-        if (massC > 100000){
-            sampleLocation = "C";
-        } else if (massR > 50000){
-            sampleLocation = "R";
-        } else {
-            sampleLocation = "L";
-        }
-        telemetry.addData("sampleLocation: ", sampleLocation);
-        telemetry.update();
-
+        Thread.sleep(100);
 
         //MOVEMENT AFTER SAMPLE
         MoveForward(4); //Unlatch
         MeacanumStrafe(0.2,200); //Strafe away from latch
         MoveForward(-4);
-        MeacanumStrafe(0.2, 820);
+
+        /*
+        MeacanumStrafe(0.2, 400);
+
+        //STUFF
+        GyroTurnSimple((90) - 40);
+        MoveForward(40);
+        MeacanumStrafe(0.2, 3000);
+        servo1.setPosition(0);
+        Thread.sleep(750);
+        servo1.setPosition(1);
+        GyroTurnSimple(-39);
+        MoveForward(50);
 
 
-        //MOVE BASED ON SAMPLE
-        if (sampleLocation == "L") {
-            MoveForward(-10);
-            MeacanumStrafe(0.2, 750);
-           /*
-           TankForward(0.5,750);
-           mineralHit();
-           TankForward(0.5, 500);
-            MeacanumStrafe(0.3, -1000);
-            */
-        } else if (sampleLocation == "C"){
-            MeacanumStrafe(0.2, 750);
-        } else if (sampleLocation == "R"){
-            MoveForward(10);
-            MeacanumStrafe(0.2, 750);
-
-        }
-
-
+      //MOVE BASED ON SAMPLE
 
 
 /*
@@ -191,7 +167,7 @@ public class AutoCRATER extends LinearOpMode {
 
 
        /*
-       //SAMPLE CODE
+       //SAMPLE CODE 
         TankForward(0.8,0);
         Thread.sleep(1500);
         TankOff();
@@ -624,8 +600,8 @@ public class AutoCRATER extends LinearOpMode {
     }
 
     public void encoderDriveMeacanum(double speed,
-                                     double leftInches, double rightInches,
-                                     double timeoutS)  {
+                             double leftInches, double rightInches,
+                             double timeoutS)  {
         int newLTtarget;
         int newLBtarget;
         int newRTtarget;

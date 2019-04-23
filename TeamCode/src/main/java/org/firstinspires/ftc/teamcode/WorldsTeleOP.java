@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.util.Range;
 @TeleOp(name = "WorldsTeleOP", group = "701")
 public class WorldsTeleOP extends LinearOpMode {
 
-    Hardware robot = new Hardware(hardwareMap);
 
     float extendDC = 0;
 
@@ -26,6 +25,8 @@ public class WorldsTeleOP extends LinearOpMode {
         boolean toggle2 = false;
 
         ElapsedTime runtime = new ElapsedTime();
+
+        Hardware robot = new Hardware(hardwareMap);
 
         waitForStart();
 

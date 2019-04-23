@@ -2,10 +2,14 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Log;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -15,30 +19,37 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.SampleLogic;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static java.lang.Math.abs;
 
+@Config
+@Autonomous(name = "TestingAutoStuff", group = "WORLDS")
+public class TestingAutoStuff extends LinearOpMode {
 
-@Autonomous(name = "AutoDEPOT", group = "States")
+    DcMotor RTMotor, RBMotor, LTMotor, LBMotor;
 
-public class AutoDEPOT extends LinearOpMode {
+    List<DcMotor> motors;
 
-    private DcMotor RBMotor;
-    private DcMotor RTMotor;
-    private DcMotor LBMotor;
-    private DcMotor LTMotor;
+    DcMotor extend;
+    DcMotor intake;
+    DcMotor lift;
+    DcMotor act;
 
-    private DcMotor extend;
-    private DcMotor bigLift;
-    private DcMotor act;
-
-    private Servo servo1;
+    CRServo servo1;
+    CRServo servo2;
 
     BNO055IMU imu;
 
     Orientation angles;
 
     boolean firstTimeREVERSE = false;
+
+    public static double K_p;
+    public static double K_i;
 
     private SampleLogic Sample;
     String TAG = "Stuff";
@@ -49,7 +60,9 @@ public class AutoDEPOT extends LinearOpMode {
     // "L", "C", "R"
     String sampleLocation = "";
 
-    static final double     COUNTS_PER_MOTOR_REV    = 2440;    // eg: TETRIX Motor Encoder
+    private ElapsedTime runtime = new ElapsedTime();
+
+    static final double     COUNTS_PER_MOTOR_REV    = 2240;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 1.0;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
@@ -57,27 +70,30 @@ public class AutoDEPOT extends LinearOpMode {
     static final double     DRIVE_SPEED             = 0.6;
     static final double     TURN_SPEED              = 0.5;
 
-    private ElapsedTime runtime = new ElapsedTime();
+    double inches;
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        RTMotor = hardwareMap.dcMotor.get("RTMotor");
+        LTMotor = hardwareMap.dcMotor.get("LTMotor");
+        RBMotor = hardwareMap.dcMotor.get("RBMotor");
+        LBMotor = hardwareMap.dcMotor.get("LBMotor");
+
+        lift = hardwareMap.dcMotor.get("lift");
+        extend = hardwareMap.dcMotor.get("extend");
+        act = hardwareMap.dcMotor.get("act");
+        intake = hardwareMap.dcMotor.get("intake");
+
+        servo1 = hardwareMap.crservo.get("servo1");
+        servo2 = hardwareMap.crservo.get("servo2");
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json";
 
-        RBMotor = hardwareMap.dcMotor.get("RBMotor");
-        RTMotor = hardwareMap.dcMotor.get("RTMotor");
-        LBMotor = hardwareMap.dcMotor.get("LBMotor");
-        LTMotor = hardwareMap.dcMotor.get("LTMotor");
-
-        extend = hardwareMap.dcMotor.get("extend");
-        bigLift = hardwareMap.dcMotor.get("bigLift");
-        act = hardwareMap.dcMotor.get("act");
-
-        servo1 = hardwareMap.servo.get("servo1");
-
         imu = hardwareMap.get(BNO055IMU.class, "imu");
+
         imu.initialize(parameters);
 
         RBMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -85,14 +101,27 @@ public class AutoDEPOT extends LinearOpMode {
         LBMotor.setDirection(DcMotor.Direction.REVERSE);
         LTMotor.setDirection(DcMotor.Direction.REVERSE);
 
-        RBMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        RTMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        LBMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        LTMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        RTMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RBMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LTMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LBMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        bigLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        extend.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         act.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        extend.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         act.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        motors = Arrays.asList(LTMotor, LBMotor, RBMotor, RTMotor);
+
+        for (DcMotor motor : motors) {
+            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
 
         Sample = new SampleLogic();
         Sample.init(hardwareMap.appContext, CameraViewDisplay.getInstance());
@@ -104,102 +133,8 @@ public class AutoDEPOT extends LinearOpMode {
             telemetry.update();
         }
 
-     //   encoderDrive(.5,4,4,5.0);
 
-        //Mass:222222
-
-
-        //31249 for max encoder lift
-        //17590
-
-        //26:1 Motor 21934 for lift
-
-      //CODE TO GET ROBOT OFF LIFT AND IN FRONT OF STUFF  
-        setLiftPos(15900);
-        GyroTurnSimple(0);
-
-
-        //Sample.changeRect();
-        //Thread.sleep(500);
-
-        //13369 NEW NEW
-        //17687
-
-        Sample.changeRect(480, 640, 340, 300);
-        Thread.sleep(50);
-        massC = sampleMass();
-
-        Sample.changeRect(480, 300, 340, 0);
-        Thread.sleep(50);
-        massR = sampleMass();
-      //  Sample.disable();
-
-        if (massC > 100000){
-            sampleLocation = "C";
-        } else if (massR > 50000){
-            sampleLocation = "R";
-        } else {
-            sampleLocation = "L";
-        }
-        telemetry.addData("sampleLocation: ", sampleLocation);
-        telemetry.update();
-
-
-        //MOVEMENT AFTER SAMPLE
-        TankForward(0.2,175); //Unlatch
-        MeacanumStrafe(0.2,200); //Strafe away from latch
-        TankForward(0.2,-25); //Move to original + 150 pos.
-        MeacanumStrafe(0.2, 500);
-
-
-      //MOVE BASED ON SAMPLE
-        if (sampleLocation == "L") {
-           TankForward(0.5,750);
-           MeacanumStrafe(0.3, 1000);
-           GyroTurnSimple(-39);
-           TankForward(0.4, -500);
-           MeacanumStrafe(0.3,  1000);
-        } else if (sampleLocation == "C"){
-            TankForward(0.3,-100);
-            MeacanumStrafe(0.3, 1550);
-            GyroTurnSimple(-39);
-            TankForward(0.4, -1000);
-        } else if (sampleLocation == "R"){
-            TankForward(0.3,-800);
-            MeacanumStrafe(0.5, 1750);
-            GyroTurnSimple(-39);
-            TankForward(0.4, -1500);
-        } else {
-            MeacanumStrafe(0.3, 1500);
-            GyroTurnSimple(-39);
-            TankForward(0.4, -1000);
-        }
-
-
-        //MOVEMENT AFTER SAMPLE
-        depositMarker();
-        GyroTurnSimple((90) - 42);
-        TankForward(0.5,-5000);
-
-
-        /*
-        depositMarker();
-      //  TankForward(0.5,-2000);
-
-
-
-       /*
-       //SAMPLE CODE 
-        TankForward(0.8,0);
-        Thread.sleep(1500);
-        TankOff();
-        TankTurn(1);
-        Thread.sleep(2000);
-        TankOff();
-        servo1.setPosition(1);
-        Thread.sleep(750);
-        servo1.setPosition(0.5);
-        */
+       GyroTurnSimple(90);
 
 
     }
@@ -213,11 +148,13 @@ public class AutoDEPOT extends LinearOpMode {
             RTMotor.setTargetPosition(target);
             LBMotor.setTargetPosition(target);
             LTMotor.setTargetPosition(target);
-            while (LTMotor.isBusy() && RTMotor.isBusy() && RBMotor.isBusy() && LBMotor.isBusy() && !isStopRequested()) {
-                RTMotor.setPower(power);
-                RBMotor.setPower(power);
-                LTMotor.setPower(power);
-                LBMotor.setPower(power);
+
+            RTMotor.setPower(power);
+            RBMotor.setPower(power);
+            LTMotor.setPower(power);
+            LBMotor.setPower(power);
+            while (LTMotor.isBusy() && !isStopRequested()) {
+            showTelemetry();
             }
             TankOff();
         } else {
@@ -276,20 +213,19 @@ public class AutoDEPOT extends LinearOpMode {
 
         resetEncoders();
 
-        int mod3 = 1;
-
-        if (target < 0){
-            mod3 = -1;
-        }
-
         if (target != 0) {
 
             runModePos();
 
-            RBMotor.setTargetPosition(-target);
-            RTMotor.setTargetPosition(target);
-            LBMotor.setTargetPosition(target);
-            LTMotor.setTargetPosition(-target);
+            LTMotor.setTargetPosition(target);
+            LBMotor.setTargetPosition(-target);
+            RTMotor.setTargetPosition(-target);
+            RBMotor.setTargetPosition(target);
+
+            LTMotor.setPower(power);
+            LBMotor.setPower(power);
+            RTMotor.setPower(power);
+            RBMotor.setPower(power);
 
             while (LTMotor.isBusy() && RTMotor.isBusy() && RBMotor.isBusy() && LBMotor.isBusy() && !isStopRequested()) {
 
@@ -302,10 +238,9 @@ public class AutoDEPOT extends LinearOpMode {
                 powerVal = Range.clip(powerVal,-1 ,1);
                 */
 
-                RTMotor.setPower(power);
-                RBMotor.setPower(power);
-                LTMotor.setPower(power);
-                LBMotor.setPower(power);
+
+
+                showTelemetry();
 /*
                 telemetry.addData("angle: ", getHeading());
                 telemetry.addData("error: ", testerror);
@@ -363,11 +298,16 @@ public class AutoDEPOT extends LinearOpMode {
 
         // -1 < testerror < 1
 
-        while (!((-1.5 < testerror) && (testerror < 1.5)) && opModeIsActive()){
+        double integral = 0;
 
-            double propControl = 0.004;
+        while (!((-1 < testerror) && (testerror < 1)) && opModeIsActive()){
 
-            double powerVal = (propControl * testerror);
+            double propControl = K_p;
+            double Ki = K_i;
+
+            integral = integral + testerror;
+
+            double powerVal = (propControl * testerror) + (integral * Ki);
             powerVal = Range.clip(powerVal,-1 ,1);
             TankTurn(-powerVal);
 
@@ -433,7 +373,7 @@ public class AutoDEPOT extends LinearOpMode {
 
             error = abs(DesAngle - getHeading());
 
-            //  integral = integral + error;
+            //  3
 
             motorAdjust = error * Kp;
             //  integral * Ki;
@@ -485,10 +425,10 @@ public class AutoDEPOT extends LinearOpMode {
 
     public void runModeNorm() {
 
-        RBMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        RTMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        LTMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        LBMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        RBMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RTMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LTMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LBMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public void runModePos() {
@@ -509,16 +449,6 @@ public class AutoDEPOT extends LinearOpMode {
         return heading;
     }
 
-    public void setLiftPos(int target){
-        act.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        act.setTargetPosition(target);
-        while(act.isBusy()){
-            act.setPower(1);
-            telemetry.addData("Encoder: ", act.getCurrentPosition());
-            telemetry.update();
-        }
-    }
-
     public int sampleMass() throws InterruptedException {
         Sample.frameNeeded = true;
         Thread.sleep(500);
@@ -530,10 +460,54 @@ public class AutoDEPOT extends LinearOpMode {
         return mass;
     }
 
-    public void depositMarker() throws InterruptedException {
-        servo1.setPosition(0);
-        Thread.sleep(500);
-        servo1.setPosition(0.5);
+    public void setActPos(int target){
+        act.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        act.setTargetPosition(target);
+        while(act.isBusy()){
+            act.setPower(1);
+            telemetry.addData("Encoder: ", act.getCurrentPosition());
+            telemetry.update();
+        }
+    }
+
+    public void setLiftPos(int target){
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift.setTargetPosition(target);
+        while(lift.isBusy()){
+            lift.setPower(1);
+            telemetry.addData("Encoder: ", lift.getCurrentPosition());
+            telemetry.update();
+        }
+    }
+
+    public void setExtendPos(int target){
+        extend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        extend.setTargetPosition(target);
+        while(extend.isBusy()){
+            extend.setPower(1);
+            telemetry.addData("Encoder: ", extend.getCurrentPosition());
+            telemetry.update();
+        }
+    }
+
+    public void IntakeOn(boolean on, double power){
+        if (on){
+            servo1.setPower(power);
+        } else {
+            servo1.setPower(0);
+        }
+    }
+
+    public void BucketOn(boolean on, double power){
+        if (on){
+            servo2.setPower(power);
+        } else {
+            servo2.setPower(0);
+        }
+    }
+
+    public void IntakeBucket(double power){
+        intake.setPower(power);
     }
 
     public void encoderDrive(double speed,
@@ -543,6 +517,9 @@ public class AutoDEPOT extends LinearOpMode {
         int newLBtarget;
         int newRTtarget;
         int newRBtarget;
+
+        leftInches /= 4;
+        rightInches /= 4;
 
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
@@ -560,7 +537,7 @@ public class AutoDEPOT extends LinearOpMode {
 
 
             // Turn On RUN_TO_POSITION
-           runModePos();
+            runModePos();
 
             // reset the timeout time and start motion.
             runtime.reset();
@@ -577,7 +554,7 @@ public class AutoDEPOT extends LinearOpMode {
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while (opModeIsActive() &&
                     (runtime.seconds() < timeoutS) &&
-                    (LTMotor.isBusy() && RTMotor.isBusy() && RBMotor.isBusy() && LBMotor.isBusy() && !isStopRequested())) {
+                    (LTMotor.isBusy() && !isStopRequested())) {
 
                 // Display it for the driver.
                 telemetry.addData("Path1",  "Running to %7d, %7d:, %7d, %7d", newLTtarget,  newLBtarget, newRTtarget, newRBtarget);
@@ -599,4 +576,25 @@ public class AutoDEPOT extends LinearOpMode {
         }
     }
 
+    public void showTelemetry(){
+        telemetry.addData("liftEncoder: ", lift.getCurrentPosition());
+        telemetry.addData("actEncoder: ", act.getCurrentPosition());
+        telemetry.addData("extendEncoder: ", extend.getCurrentPosition());
+        telemetry.addData("intakeEncoder: ", intake.getCurrentPosition());
+        telemetry.addData("Power:" , intake.getPower());
+
+        telemetry.addData("---","------");
+
+        telemetry.addData("power: ", LTMotor.getPower());
+        telemetry.addData("LTMotor: ", LTMotor.getCurrentPosition());
+        telemetry.addData("power: ", LBMotor.getPower());
+        telemetry.addData("LBMotor: ", LBMotor.getCurrentPosition());
+        telemetry.addData("power: ", RTMotor.getPower());
+        telemetry.addData("RTMotor: ", RTMotor.getCurrentPosition());
+        telemetry.addData("power: ", RBMotor.getPower());
+        telemetry.addData("RBMotor: ", RBMotor.getCurrentPosition());
+
+        telemetry.update();
+
+    }
 }

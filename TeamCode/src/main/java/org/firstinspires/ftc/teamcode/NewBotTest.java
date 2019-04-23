@@ -1,11 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @TeleOp(name = "DetriotTeleOP", group = "701")
 public class NewBotTest extends LinearOpMode {
@@ -34,6 +37,10 @@ public class NewBotTest extends LinearOpMode {
      boolean extendBool = false;
      boolean actBool = false;
 
+    BNO055IMU imu;
+
+    Orientation angles;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -50,14 +57,22 @@ public class NewBotTest extends LinearOpMode {
         servo1 = hardwareMap.crservo.get("servo1");
         servo2 = hardwareMap.crservo.get("servo2");
 
-        RTMotor.setDirection(DcMotor.Direction.FORWARD);
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json";
+
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+
         RBMotor.setDirection(DcMotor.Direction.FORWARD);
-        LTMotor.setDirection(DcMotor.Direction.REVERSE);
+        RTMotor.setDirection(DcMotor.Direction.FORWARD);
         LBMotor.setDirection(DcMotor.Direction.REVERSE);
+        LTMotor.setDirection(DcMotor.Direction.REVERSE);
 
         LTMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LBMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RTMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RBMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         LTMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         LBMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -109,10 +124,10 @@ public class NewBotTest extends LinearOpMode {
             }
             */
 
-            RTMotor.setPower(RightTopDC);
-            RBMotor.setPower(RightBackDC);
             LTMotor.setPower(LeftTopDC);
             LBMotor.setPower(LeftBackDC);
+            RTMotor.setPower(RightTopDC);
+            RBMotor.setPower(RightBackDC);
 
             if (!liftBool) {
                 lift.setPower(liftDC);
@@ -213,9 +228,16 @@ public class NewBotTest extends LinearOpMode {
 
         telemetry.addData("---","------");
 
-        telemetry.addData("leftEncoder: ", LTMotor.getCurrentPosition());
-        telemetry.addData("CenterEncoder: ", LBMotor.getCurrentPosition());
-        telemetry.addData("RightEncoder: ", RTMotor.getCurrentPosition());
+        telemetry.addData("power: ", LTMotor.getPower());
+        telemetry.addData("LTMotor: ", LTMotor.getCurrentPosition());
+        telemetry.addData("power: ", LBMotor.getPower());
+        telemetry.addData("LBMotor: ", LBMotor.getCurrentPosition());
+        telemetry.addData("power: ", RTMotor.getPower());
+        telemetry.addData("RTMotor: ", RTMotor.getCurrentPosition());
+        telemetry.addData("power: ", RBMotor.getPower());
+        telemetry.addData("RBMotor: ", RBMotor.getCurrentPosition());
+
+        telemetry.addData("Heading: ", imu.getAngularOrientation().firstAngle);
 
         telemetry.update();
 
