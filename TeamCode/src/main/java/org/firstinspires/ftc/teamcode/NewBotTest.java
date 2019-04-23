@@ -104,7 +104,7 @@ public class NewBotTest extends LinearOpMode {
             float LeftBackDC = (gamepad1.left_stick_y * 0.7f - gamepad1.right_stick_x * 0.5f + gamepad1.left_stick_x * 0.7f) / mod;
 
             float liftDC = (-gamepad2.right_trigger + gamepad2.left_trigger);
-            float intakeDC = (-gamepad2.left_stick_y);
+            float intakeDC = (-gamepad2.right_stick_y);
             float actDC = (-gamepad1.left_trigger + gamepad1.right_trigger);
 
             RightTopDC = Range.clip(RightTopDC, -1, 1);
@@ -176,7 +176,7 @@ public class NewBotTest extends LinearOpMode {
                 }
             }
 
-            servo2.setPower(gamepad2.right_stick_y);
+            servo2.setPower(gamepad2.left_stick_y);
 /*
             if (gamepad2.left_bumper){
                 intake.setMode(DcMotor.RunMode.RUN_TO_POSITION);
